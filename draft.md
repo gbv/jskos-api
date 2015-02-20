@@ -14,9 +14,20 @@ This document describes a JSON-API to access controlled vocabularies.
 ### Core methods
 
 * `schemes` - list known schemes
-* `topConcepts` - list top concepts of a scheme
+* `topConcepts/top` - list top concepts of a scheme
 * `types` - list known types
 * `concepts` - find concepts with given properties
+
+If schemes have unique notations, request methods can be put in URL structure like this.
+
+    /schemes
+    /schemes/ddc
+    /schemes/ddc/top
+    /schemes/ddc/types
+    /schemes/ddc/concepts
+    /schemes/ddc/...
+    
+TODO: *how to publish, which methods are available where?*
 
 ### Utility methods
 
@@ -83,3 +94,9 @@ HTTP Status code (400, 401, 403, 404, 405, 410, 415. 429...) and response body:
       "message": ...,
       "description": ...details-such-as-field-names...
     }
+    
+## Additional data
+
+For instance latitude, longitude, givenname, surname...
+
+SHOULD be documented with a JSON-LD context document (to put where?).
