@@ -1,0 +1,18 @@
+swagger: '2.0'
+info:
+  title: JSKOS API
+  description: JSON-API to access controlled vocabularies
+  version: "0.0.0"
+host: example.org
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+paths:
+  /schemes:
+    get:
+      summary: Get concept schemes
+      responses:
+        200:
+          description: An array of JSKOS Concept schemes, possibly wrapped in an envelope for pagination
