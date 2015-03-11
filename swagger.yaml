@@ -9,6 +9,79 @@ schemes:
 basePath: /v1
 produces:
   - application/json
+parameters: 
+  scheme:
+    name: scheme
+    in: path
+    description: Unique notation of a concept scheme
+    required: true
+    type: string
+  prefLabel:
+    name: prefLabel
+    in: query
+    description: Preferred label of a concept
+    required: false
+    type: string
+  altLabel:
+    name: altLabel
+    in: query
+    description: Alternative label of a concept
+    required: false
+    type: string
+  hiddenLabel:
+    name: hiddenLabel
+    in: query
+    description: Hidden label of a concept
+    required: false
+    type: string
+  label:
+    name: label
+    in: query
+    description: Label of a concept (any of prefLabel, altLabel, or hiddenLabel)
+    required: false
+    type: string
+  language:
+    name: language
+    in: query
+    description: Language of label or note
+    required: false
+    type: string
+  type:
+    name: type
+    in: query
+    description: Concept type (URI)
+    required: false
+    type: string
+  uri:
+    name: uri
+    in: query
+    description: URI of a concept
+    required: false
+    type: string
+  notation:
+    name: notation
+    in: query
+    description: Notation of a concept
+    required: false
+    type: string
+  broaderOf:
+    name: broaderOf
+    in: query
+    description: URI of a concept to get broader concepts from
+    required: false
+    type: string
+  narrowerOf:
+    name: narrowerOf
+    in: query
+    description: URI of a concept to get narrower concepts from
+    required: false
+    type: string
+  related:
+    name: related
+    in: query
+    description: URI of a concept to related concepts from
+    required: false
+    type: string
 paths:
   /schemes:
     get:
@@ -16,15 +89,46 @@ paths:
       responses:
         200:
           description: An array of JSKOS Concept schemes, possibly wrapped in an envelope for pagination
-  "/schemes/{scheme}":
+  /schemes/{scheme}:
     get:
       summary: Get information about a concept scheme
       responses:
         200:
           description: A JSKOS concept scheme object
       parameters: 
-        - name: scheme
-          in: path
-          description: name of the scheme
-          required: true
-          type: string
+        - $ref: "#/parameters/scheme"
+  /schemes/{scheme}/topConcepts:
+    get:
+      summary: Get a list of top concepts of a concept scheme
+      responses:
+        200:
+          description: A JSKOS concept scheme object
+      parameters: 
+        - $ref: "#/parameters/scheme"
+  /schemes/{scheme}/types:
+    get:
+      summary: Get a list concept types
+      responses:
+        200:
+          description: An array of type URIs (?)
+      parameters: 
+        - $ref: "#/parameters/scheme"
+  /schemes/{scheme}/concepts:
+    get:
+      summary: Get a list of concepts
+      responses:
+        200:
+          description: An array of JSKOS concept objects, possibly wrapped for pagination
+      parameters: 
+        - $ref: "#/parameters/scheme"
+        - $ref: "#/parameters/prefLabel"
+        - $ref: "#/parameters/altLabel"
+        - $ref: "#/parameters/hiddenLabel"
+        - $ref: "#/parameters/label"
+        - $ref: "#/parameters/language"
+        - $ref: "#/parameters/uri"
+        - $ref: "#/parameters/notation"
+        - $ref: "#/parameters/type"
+        - $ref: "#/parameters/related"
+        - $ref: "#/parameters/broaderOf"
+        - $ref: "#/parameters/narrowerOf"
