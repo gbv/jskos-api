@@ -12,7 +12,19 @@ produces:
 paths:
   /schemes:
     get:
-      summary: Get concept schemes
+      summary: Get a list of concept schemes
       responses:
         200:
           description: An array of JSKOS Concept schemes, possibly wrapped in an envelope for pagination
+  "/schemes/{scheme}":
+    get:
+      summary: Get information about a concept scheme
+      responses:
+        200:
+          description: A JSKOS concept scheme object
+      parameters: 
+        - name: scheme
+          in: path
+          description: name of the scheme
+          required: true
+          type: string
