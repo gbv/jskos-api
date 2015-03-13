@@ -1,3 +1,5 @@
+# Experimental Swagger specification of JSKOS-API
+# This file is incomplete compared to the textual specification!
 swagger: '2.0'
 info:
   title: JSKOS API
@@ -97,22 +99,6 @@ paths:
           description: A JSKOS concept scheme object
       parameters: 
         - $ref: "#/parameters/scheme"
-  /schemes/{scheme}/topConcepts:
-    get:
-      summary: Get a list of top concepts of a concept scheme
-      responses:
-        200:
-          description: A JSKOS concept scheme object
-      parameters: 
-        - $ref: "#/parameters/scheme"
-  /schemes/{scheme}/types:
-    get:
-      summary: Get a list concept types
-      responses:
-        200:
-          description: An array of type URIs (?)
-      parameters: 
-        - $ref: "#/parameters/scheme"
   /schemes/{scheme}/concepts:
     get:
       summary: Get a list of concepts
@@ -132,3 +118,20 @@ paths:
         - $ref: "#/parameters/related"
         - $ref: "#/parameters/broaderOf"
         - $ref: "#/parameters/narrowerOf"
+  /schemes/{scheme}/types:
+    get:
+      summary: Get a list concept types
+      responses:
+        200:
+          description: An array of type URIs (?)
+      parameters: 
+        - $ref: "#/parameters/scheme"
+  /schemes/{scheme}/topConcepts:
+    get:
+      summary: Get a list of top concepts of a concept scheme
+      responses:
+        200:
+          description: A JSKOS concept scheme object
+      parameters: 
+        - $ref: "#/parameters/scheme"
+
