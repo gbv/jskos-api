@@ -5,28 +5,10 @@ vocabularies in [JSKOS](http://gbv.github.io/jskos/) format.
 
 The specification is hosted in a public git repository at
 <https://github.com/gbv/jskos-api>. The repository includes a textual
-description (this document) and a [Swagger](http://swagger.io/) file
+description (this document) and a [Swagger](http://swagger.io/) draft
 (`jskos-api.yaml`). Comments and contributions are welcome!
 
 ## Synopsis
-
-A JSKOS API endpoint for *one concept scheme* ("JSKOS API ONE") MUST provide at
-least three URL paths for HTTPS GET requests on a common base URL
-(`https://example.org/jskos/` in this example):
-
-* `https://example.org/jskos` - get data about the concept scheme
-* `https://example.org/jskos/concepts` - get data about its concepts
-* `https://example.org/jskos/types` - get data about its concept types
-
-A JSKOS API endpoint for *multiple concept schemes* ("JSKOS API MANY") MUST
-provide an URL path ending with `/schemes` for HTTPS GET requests on a common
-base URL (`https://example.org/jskos/` in this example), and a JSKOS API for
-each concept scheme on a sub-path as following.
-
-* `https://example.org/jskos/schemes` - get data about concept schemes
-* `https://example.org/jskos/schemes/{scheme}` - JSOS API ONE for a concept scheme
-* `https://example.org/jskos/schemes/{scheme}/concepts` - JSOS API ONE for a concept scheme
-* `https://example.org/jskos/schemes/{scheme}/types` - JSOS API ONE for a concept scheme
 
 A JSKOS API endpoint *may* support [additional methods](#additional-methods)
 which can all be implemented based on the core methods.
@@ -45,30 +27,48 @@ which can all be implemented based on the core methods.
 
 ### Core methods
 
+* `/concepts`
 * `/schemes`
-* `/schemes/{scheme}`
-* `/schemes/{scheme}/types`
-* `/schemes/{scheme}/concepts`
+* `/types`
+* `/mappings`
 
-### Additional methods
+### Utility methods
 
-A JSKOS API ONE *should* support additional URL paths to simplify requests.
+A JSKOS API *should* support additional URL paths to simplify requests.
 These additional methods can all be mapped to the core methods, for instance
 with a HTTP proxy that can rewrite URL path and HTTP GET parameters.
 
-* `/topConcepts` - list top concepts of a scheme
-* `/notation/{notation}` - get unique concept by notation
-* `/notation/{notation}/broader` - get broader concepts of a unique concept
-* `/notation/{notation}/narrower` - get narrower concepts of a unique concept
-* `/notation/{notation}/related` - get related concepts of a unique concept
-* `/suggest` - search with OpenSearch suggestions return format (requires truncation)
+* `/schemes/{scheme}`
+  = `/schemes?notation={scheme}`
+* `/schemes/{scheme}/concepts`
+  = `/concepts?inScheme.notation={scheme}`
+* `/schemes/{scheme}/topConcepts`
+  = `/concepts?topConceptOf.notation={scheme}`
+* `/schemes/{scheme}/types`
+  = `/types?inScheme.notation={scheme}`
+* `/concepts/{notation}`
+  = `/concepts?notation={notation}`
+* `/concepts/{notation}/narrower`
+  = `/concepts?notation={notation}&list=narrower`
+* `/concepts/{notation}/broader`
+  = `/concepts?notation={notation}&list=broader`
+* `/concepts/{notation}/related`
+  = `/concepts?notation={notation}&list=related`
+* `/schemes/{scheme}/concepts/{notation}`
+  = `/concepts?inScheme.notation={scheme}`
+* `/schemes/{scheme}/concepts/{notation}/narrower`
+  = `/concepts?inScheme.notation={scheme}&notation={notation}&list=narrower`
+* `/schemes/{scheme}/concepts/{notation}/broader`
+  = `/concepts?inScheme.notation={scheme}&notation={notation}&list=broader`
+* `/schemes/{scheme}/concepts/{notation}/related`
+  = `/concepts?inScheme.notation={scheme}&notation={notation}&list=broader`
+
+Note that these utility URLs may problematic if notations contain `/`. 
+
+In addition (TODO):
+
+* `/suggest` - search with OpenSearch suggestions return format (requires truncation) = `list=suggest`
 * ...
-
-In addition the api endpoint *may* support more complex search with HTTP POST
-requests in JSKOS and/or SPARQL to be specified later.
-
-A later version of this specification *may* require some of this additional methods
-and/or provide means to query the capabilities of an API endpoint.
 
 ## Request parameters
 
@@ -99,9 +99,9 @@ default value *should* be 20. Paging can be controlled with request parameter
 Links to previous, next, first, and last pages *must* be included in the HTTP
 `Link` header:
 
-    Link: <https://example.org/jskos/schemes?page=2&limit=20>; rel="next",
-          <https://example.org/jskos/schemes?page=2&limit=3>; rel="last",
-          <https://example.org/jskos/schemes?limit=20>; rel="first"
+    Link: <https://example.org/v1/schemes?page=2&limit=20>; rel="next",
+          <https://example.org/v1/schemes?page=2&limit=3>; rel="last",
+          <https://example.org/v1/schemes?limit=20>; rel="first"
 
 The total number of items should also be sent back with the HTTP Header
 `X-Total-Count`.
@@ -118,20 +118,37 @@ empty string) can be used to transform a list result into either a single item
 
 ## Search parameters
 
-### Concept search
+### Schemes
+
+...
+
+### Concepts
 
 Search via query parameters, combined as boolean AND (boolean OR is not supported). Concept search supports the following concept properties:
 
+* **`uri`**
 * **`prefLabel`**, **`altLabel`**, **`hiddenLabel`**
 * **`label`** (any of `prefLabel`, `altLabel`, `hiddenLabel`)
 * **`notation`**
 * **`type`** (full URIs)
 * **`broader`**, **`narrower`**, **`related`** (values must be full URIs)
 * **`note`** (any kind of note)
+* **`inScheme`** (URI)
+* **`inScheme.notation`**
 
 Label properties and documentation properties can be localized by appending `.` and the language tag, e.g. `prefLabel.en=fox`.
     
 The field name `label` can be used to refer to any of `prefLabel`, `altLabel`, and `hiddenLabel`. For instance `label=fox` can be used to search for concepts with any kind of label having the value "fox". The name can also be localized e.g. `label.en=fox`.
+
+To get the list of broader, narrower, or related concepts instead of the full concept, use parameter **`list`** with possible values `broader`, `narrower`, `related`.
+
+### Types
+
+The `/types` endpoint returns a list of concept types, each represented as JSKOS Concept. The default type `skos:Concept` may be omitted. Search parameters are equivalent to concept search parameters except `type` is not allowed.
+
+### Mappings
+
+...
 
 ### Truncation
 
