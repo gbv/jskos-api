@@ -4,15 +4,19 @@ This document describes an experimental JSON-API to access controlled
 vocabularies in [JSKOS](http://gbv.github.io/jskos/) format.
 
 The specification is hosted in a public git repository at
-<https://github.com/gbv/jskos-api>. The repository includes a textual
-description (this document) and a [Swagger](http://swagger.io/) draft
-(`jskos-api.yaml`). Comments and contributions are welcome!
+<https://github.com/gbv/jskos-api>. The repository includes a primary, textual
+description (this document) and the draft of a secondary
+[Swagger](http://swagger.io/) document (`jskos-api.yaml`).
+
+*Comments and contributions are welcome!*
 
 ## Synopsis
 
+...
+
 A JSKOS API endpoint *may* support [additional methods](#additional-methods)
 which can all be implemented based on the core methods.
-
+ 
 ## Basics
 
 * HTTPS GET requests only (a later version may also support write operations)
@@ -22,7 +26,7 @@ which can all be implemented based on the core methods.
 * *may* support Simple Auth (token as username) or OAuth 2 for restricted access
 * HTTP error responses must return a JSON document as response body with fields
   `code`, `message`, and `description`.
- 
+
 ## Request methods
 
 ### Core methods
@@ -62,6 +66,7 @@ with a HTTP proxy that can rewrite URL path and HTTP GET parameters.
   = `/concepts?inScheme.notation={scheme}&notation={notation}&list=broader`
 * `/schemes/{scheme}/concepts/{notation}/related`
   = `/concepts?inScheme.notation={scheme}&notation={notation}&list=broader`
+* ...
 
 Note that these utility URLs may problematic if notations contain `/`. 
 
@@ -110,10 +115,11 @@ The special request parameter **`unique`** (set to any value but `0` or the
 empty string) can be used to transform a list result into either a single item
 (if total count is 1) or a HTTP 300 response:
 
- without `unique`          | with `unique`
--------------------------- | --------------
-`[ { ... } ]`              | { ... }
-`[ { ... }, { ... } ... ]` | HTTP 300
+ without `unique` (HTTP 200) | with `unique`
+---------------------------- | --------------------
+`[ { ... } ]`                | { ... } (HTTP 200)
+`[ ]`                        | error with HTTP 404
+`[ { ... }, { ... } ... ]`   | error with HTTP 300
 
 
 ## Search parameters
@@ -148,12 +154,21 @@ The `/types` endpoint returns a list of concept types, each represented as JSKOS
 
 ### Mappings
 
-...
+Mappings can be searched with query parameters, combined as boolean AND:
+
+* **`fromScheme`** and **`toScheme`** to select concept schemes by URI
+* **`fromSchemeNotation`** and **`toSchemeNotation`** to select concept schemes by notation
+* **`from`** and **`to`** to select concepts by URI
+* **`fromNotation`** and **`toNotation`** to select concepts by notations
+* **`fromType`** and **`toType`** to select concepts by type URI
+* **`creator`**, `publisher`**, **`contributor`**, **`source`**,
+  **`provenance`**... for mapping metadata
+* ...
 
 ### Truncation
 
 The search parameter **`truncate`** set to `truncate=right` enables
-right-truncation.
+right-truncation for all query parameters except URIs.
  
 ### Normalization
 
