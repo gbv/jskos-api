@@ -1,23 +1,16 @@
-# JSKOS API
+# Introduction
 
 This document describes an experimental JSON-API to access controlled
-vocabularies in [JSKOS](http://gbv.github.io/jskos/) format.
+vocabularies (also known as knowledge organization systems) in
+[JSKOS](http://gbv.github.io/jskos/) format.
 
 The specification is hosted in a public git repository at
-<https://github.com/gbv/jskos-api>. The repository includes a primary, textual
-description (this document) and the draft of a secondary
-[Swagger](http://swagger.io/) document (`jskos-api.yaml`).
+<https://github.com/gbv/jskos-api>. Comments and contributions are welcome!
 
-*Comments and contributions are welcome!*
+JSKOS-API is being defined as part of project
+[coli-conc](https://coli-conc.gbv.de). The current version is an early draft.
 
-## Synopsis
-
-...
-
-A JSKOS API endpoint *may* support [additional methods](#additional-methods)
-which can all be implemented based on the core methods.
- 
-## Basics
+# Basics
 
 * HTTPS GET requests only (a later version may also support write operations)
 * JSON content type only, based on [JSKOS](http://gbv.github.io/jskos/) format.
@@ -27,16 +20,32 @@ which can all be implemented based on the core methods.
 * HTTP error responses must return a JSON document as response body with fields
   `code`, `message`, and `description`.
 
-## Request methods
+# Request methods
 
-### Core methods
+A JSKOS API endpoint *may* support [additional methods](#additional-methods)
+which can all be implemented based on the core methods.
+ 
+The endpoint MUST return a JSON document with the following optional fields:
+
+* `concepts`
+* `schemes`
+* `types`
+* `mappings`
+* ...
+
+and the following mandatory fields
+
+* `title`
+* `version`
+
+## Core methods
 
 * `/concepts`
 * `/schemes`
 * `/types`
 * `/mappings`
 
-### Utility methods
+## Utility methods
 
 A JSKOS API *should* support additional URL paths to simplify requests.
 These additional methods can all be mapped to the core methods, for instance
@@ -75,9 +84,33 @@ In addition (TODO):
 * `/suggest` - search with OpenSearch suggestions return format (requires truncation) = `list=suggest`
 * ...
 
-## Request parameters
+# HTTP headers
 
-### Properties
+## Request headers {.unnumbered}
+
+...
+
+## Response headers {.unnumbered}
+
+...
+
+Content-Type
+  : ..
+X-Total-Count
+  : ...
+Link
+  : ...
+Access-Control-Expose-Headers
+  : The value `Link X-Total-Count`
+Access-Control-Allow-Origin
+  : The value `*` or another origin domain in response to a `Origin` request
+    header.
+
+...
+
+# Request parameters
+
+## Properties
 
 All request methods *must* support the query parameter **`properties`**,
 expecting a comma-separated list of property names to be included in JSKOS
@@ -93,7 +126,7 @@ The property name `label` is a alias for `prefLabel,altLabel,hiddenLabel`.
 
 The `uri` property *should* always be included in responses, if available.
 
-### Pagination
+## Pagination
 
 The requests methods `/schemes`, `/schemes/{scheme}/types`, and
 `/schemes/{scheme}/concepts` can return multiple response items. The number of
@@ -122,13 +155,13 @@ empty string) can be used to transform a list result into either a single item
 `[ { ... }, { ... } ... ]`   | error with HTTP 300
 
 
-## Search parameters
+# Search parameters
 
-### Schemes
+## Schemes
 
 ...
 
-### Concepts
+## Concepts
 
 Search via query parameters, combined as boolean AND (boolean OR is not supported). Concept search supports the following concept properties:
 
@@ -148,11 +181,11 @@ The field name `label` can be used to refer to any of `prefLabel`, `altLabel`, a
 
 To get the list of broader, narrower, or related concepts instead of the full concept, use parameter **`list`** with possible values `broader`, `narrower`, `related`.
 
-### Types
+## Types
 
 The `/types` endpoint returns a list of concept types, each represented as JSKOS Concept. The default type `skos:Concept` may be omitted. Search parameters are equivalent to concept search parameters except `type` is not allowed.
 
-### Mappings
+## Mappings
 
 Mappings can be searched with query parameters, combined as boolean AND:
 
@@ -161,16 +194,16 @@ Mappings can be searched with query parameters, combined as boolean AND:
 * **`from`** and **`to`** to select concepts by URI
 * **`fromNotation`** and **`toNotation`** to select concepts by notations
 * **`fromType`** and **`toType`** to select concepts by type URI
-* **`creator`**, `publisher`**, **`contributor`**, **`source`**,
+* **`creator`**, **`publisher`**, **`contributor`**, **`source`**,
   **`provenance`**... for mapping metadata
 * ...
 
-### Truncation
+## Truncation
 
 The search parameter **`truncate`** set to `truncate=right` enables
 right-truncation for all query parameters except URIs.
  
-### Normalization
+## Normalization
 
 When searching all strings must be Unicode normalized to not distinguish
 composed and decomposed characters sequences.  The final JSON response *must*
@@ -195,7 +228,66 @@ accents and diacritics aka "accent folding". See Unicode
 [character properties](http://unicode.org/reports/tr44/#Property_Definitions)
 for possible criteria.
 
-### Examples
+# References
+
+## Normative References
+
+* Bradner, S. 1997. “RFC 2119: Key words for use in RFCs to Indicate Requirement Levels”.
+  <http://tools.ietf.org/html/rfc2119>.
+
+* Crockford, D. 2006. “RFC 6427: The application/json Media Type for JavaScript Object Notation (JSON)”.
+  <http://tools.ietf.org/html/rfc4627>.
+
+* Fielding, R. 1999. “RFC 2616: Hypertext Transfer Protocol”.
+  <http://tools.ietf.org/html/rfc2616>.
+
+* van Kesteren, Anne. 2014. “Cross-Origin Resource Sharing”.
+  <http://www.w3.org/TR/cors/>
+
+* Rescorla, E. 2000. “RFC 2818: HTTP over TLS”.
+  <http://tools.ietf.org/html/rfc2818>.
+
+* Voß, J. 2015. “JSKOS data format for knowledge organization systems”.
+  <https://gbv.github.io/jskos/>. 
+
+* ...
+
+## Informative References
+
+...
+
+## Revision history
+
+This is version **{VERSION}** of JSKOS-API specification, last modified at
+{GIT_REVISION_DATE} with revision {GIT_REVISION_HASH}.
+
+Version numbers follow [Semantic Versioning](http://semver.org/): each number
+consists of three numbers, optionally followed by `+` and a suffix:
+
+* The major version (first number) is increased if changes require
+  a modification of PAIA clients
+* The minor version (second number) is increased if changes require
+  a modification a PAIA servers
+* The patch version (third number) is increased for backwards compatible
+  fixes or extensions, such as the introduction of new optional fields
+* The optional suffix indicates informal changes in documentation
+
+### Releases {.unnumbered}
+
+Releases with functional changes are tagged with a version number and included
+at <https://github.com/gbv/jskos-api/releases> with release notes.
+
+#### 0.0.0 (unpublished) {.unnumbered}
+
+The current version is an early draft so it has not been tagged as release yet.
+
+### Full changelog {.unnumbered}
+
+{GIT_CHANGES}
+
+# Examples {.unnumbered}
+
+The following example illustrates truncation and normalization:
 
     /concepts?prefLabel=weisskopf&truncate=right&fold=all
 
