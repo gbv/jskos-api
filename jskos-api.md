@@ -6,10 +6,9 @@ taxonomies, expressed in [JSKOS](http://gbv.github.io/jskos/) format.
 
 ## Synopsis
 
-A JSKOS API consists of a base URL and a set of request endpoints to query
-[concepts](#concept-endpoint), [concept schemes](#schemes-endpoint), [concept
-types](#types-endpoint), and [concept mappings] with HTTP GET
-requests.
+A JSKOS API consists of a base URL and a set of [request endpoints] to query
+[concepts](#concepts), [concept schemes](#schemes), [concept types](#types),
+and [concept mappings](#mappings).
 
 ## Status of this document
 
@@ -29,44 +28,50 @@ interpreted as described in RFC 2119.
 
 # Request and response format
 
-## Request
+## Basics
 
-* HTTPS GET, HEAD, OPTIONS requests only (a later version may also support write operations)
-* support CORS and optionally JSONP (`callback` parameter)
+A JSKOS API server MUST respond to HTTP GET, HEAD, and OPTIONS requests. The
+response body MUST be valid JSON or empty. A JSON response body SHOULD be
+pretty-printed.  A JSON response MUST be one of
 
-Core endpoints:
+* a [description response],
+* a [JSKOS](http://gbv.github.io/jskos/) object (concept, concept scheme, or
+  mapping) or an array of JSKOS objects,
+* an [error response]
 
-* `/concepts`
-* `/schemes`
-* `/types`
-* `/mappings`
+A JSKOS API server SHOULD provide a base URL to request a a [description
+response], a set of [request endpoints], and optional [utility endpoints]. 
 
-A JSKOS API endpoint MAY support [additional endpoints](#utility-endpoints)
-which can all be implemented based on the core endpoints.
+Endpoints MUST be queried via with HTTP GET with URL query fields. Each URL
+query field is one of
 
-Each URL query parameters is one of
-
-* query parameter of some kind (text, URI, numeric, geospatial...)
+* query parameter (depending on the request endpoint)
 * [query modifier](#query-modifiers)
 
-## Request headers
+## URL query fields
 
-...
+## HTTP headers
 
-## Response body
+### Request headers {.unnumbered}
 
-All HTTP responses MUST be valid JSON.
+The following HTTP request headers SHOULD be included in requests to JSKOS API:
 
-* based on [JSKOS](http://gbv.github.io/jskos/) format
-* SHOULD pretty-print JSON and gzip compression supported by default.
+Accept
+  : The value `application/json`
+User-Agent
+  : An appropriate client name and version number
+Accept-Language
+  : *See <https://github.com/gbv/jskos-api/issues/2> for discussion!*
 
-Possible response types include:
+A OPTIONS preflight request for Cross-Origin Resource Sharing (CORS) MUST
+include the cross-origin request headers:
 
-* [description document]
-* JSKOS object or list of JSKOS objects
-* [error response]
+Origin
+  : Where the cross-origin request originates from
+Access-Control-Request-Method 
+  : The HTTP verb of the actual request (GET or OPTIONS)
 
-## Response headers
+### Response headers {.unnumbered}
 
 A JSKOS API MUST support the following HTTP response headers:
 
@@ -75,9 +80,10 @@ Content-Type
     JSON response; the value `application/javascript` or 
     `application/javascript; charset=utf-8` for JSONP response
 X-Total-Count
-  : Total number of results for [pagination].
+  : Total number of results if the response body is a JSON array
+    (see [pagination] for details).
 Link
-  : Links for [pagination].
+  : Links for [pagination] if the response body is a JSON array.
 Access-Control-Expose-Headers
   : The value `Link X-Total-Count`
 Access-Control-Allow-Origin
@@ -85,68 +91,84 @@ Access-Control-Allow-Origin
     header.
 Allow
   : A list of supported HTTP verbs (`GET, HEAD, OPTIONS`) in response to 
-    OPTIONS requests or errors with status 405.
+    a OPTIONS request or with an [error response] with status code 405.
 
-## Description Documents
+## Description Response
 
-A **description document** is a JSON object that describes properties and
-capabilities of a JSKOS API. A description document MUST be returned for
-HTTP GET requests at its base URL.
+[description response]: #description-response
+
+A JSKOS API server SHOULD provide a **base URL**. A **description response**
+MUST be returned at the base URL for HTTP GET requests and it SHOULD be
+returned for HTTP OPTIONS requests as well.
+
+A description response is a JSON object that describes properties and
+capabilities of JSKOS API. 
+
+A description response MUST contain the property `jskos-api` giving which
+version of this specification the API conforms to.
+
+...
 
 It SHOULD also be returned for HTTP OPTIONS requests at its base URL and core
 methods, except when request header `Origin` is included for a CORS preflight
 request.
 
-A description document MUST contain the property `jskos-api` giving which
-version of this specification the API conforms to.
+...
 
-Description documents at core endpoints (concepts endpoint, schemes endpoint,
+Description response at core endpoints (concepts endpoint, schemes endpoint,
 types endpoint, mappings endpoint) MUST contain at least property `href` with
 an absolute or relative URI reference of the described method. 
 
-Other properties of description documents describe which optional features 
+Other properties of description response describe which optional features 
 a JSKOS API supports.
 
-A description document at base URL contains description documents for each
+A description response at base URL contains description response for each
 supported core endpoints at properties `concepts`, `schemes`, `types`, and
-`mappings` respectively. The property `jskos-api` can be omitted in included
-description documents as it can be derived from the base document.
+`mappings` respectively. 
 
-**Example**
+...
 
-The following description document returned for HTTP OPTIONS requests at
-<https://example.org/jskos/concepts> all describe the same concepts method:
-
-```json
-{ "jskos-api": "1.0.0", "href": "concepts" } 
-{ "jskos-api": "1.0.0", "href": "./concepts" } 
-{ "jskos-api": "1.0.0", "href": "//example.org/jskos/concepts" } 
-{ "jskos-api": "1.0.0", "href": "https://example.org/jskos/concepts" } 
-```
-
-A minimal description document for this service returned at the base URL 
-<https://example.org/jskos/> would be:
+<div class="example">
+The following description responses returned at a base URL
+<https://example.org/jskos/> all include a reference to the same [concepts
+endpoint] <https://example.org/jskos/concepts>: The same response are returned
+to a HTTP OPTIONS requests at this endpoint.
 
 ```json
-{ 
-  "jskos-api": "1.0.0", 
-  "concepts": {
-    "href": "concepts" 
-  } 
-}
+{ "jskos-api": "1.0.0", "concepts": { "href": "concepts" } } 
+{ "jskos-api": "1.0.0", "concepts": { "href": "./concepts" } } 
+{ "jskos-api": "1.0.0", "concepts": { "href": "//example.org/jskos/concepts"
+} }
+{ "jskos-api": "1.0.0", "concepts": { "href": "https://example.org/jskos/concepts" } }
 ```
+</div>
 
 ## Error responses
 
 [error response]: #error-responses
 
-An error response body is a JSON document with properties `code`, `message`,
-and `description`.
+Error responses with HTTP status code 4xx (client error) or 5xx (server error)
+SHOULD be returned with a JSON object response body having the following
+fields:
 
-...
+* **`code`** (REQUIRED) the HTTP status error code.
+* **`error`** (REQUIRED) a custom error code. 
+  Allowed characters include `a-z`, `0-9` and underscore (`_`).
+* **`message`** (OPTIONAL) a human-readable error message.
+  Intended to be shown to an end user.
+* **`error_description`** (OPTIONAL) a human-readable error description.
+  Intended for a developer, not an end user.
+* **`error_uri`** (OPTIONAL) a URL of a human-readable web page with
+  information about the error.
 
+The response headers SHOULD include a `Content-Language` header to indicate the
+language of human-readable message and description. The `Accept-Language`
+request header SHOULD be used to select a language if multiple languages are
+supported.
 
-# Endpoints
+# Request endpoints
+
+[request endpoints]: #request-endpoints
 
 * [concepts endpoint]
 * [schemes endpoint]
@@ -154,7 +176,7 @@ and `description`.
 * [mappings endpoint]
 
 Each endpoint supports a set of query parameters, which are combined as
-boolean AND (boolean OR is not supported).
+boolean AND. Boolean OR is not supported.
 
 Label properties and documentation properties can be localized by appending `.`
 and the language tag to the corresponding query parameter, e.g.
@@ -193,7 +215,7 @@ A **schemes endpoint** provides information about concept schemes in JSKOS
 concept schemes format.
 
 A schemes endpoint SHOULD at least return information about concept schemes
-that are references in concepts of a corresponding [concepts endpoint].
+that are referenced in concepts of a corresponding [concepts endpoint].
 
 ### Query parameters {.unnumbered}
 
@@ -296,6 +318,15 @@ Mappings can be searched with query parameters, combined as boolean AND:
 Some special URL query parameters control how a request is processed
 and returned.
 
+## JSONP
+
+The **`callback`** parameter will make JSON response body wrapped in a callback
+function. 
+
+<div class="note">
+Clients SHOULD prefer CORS over JSONP.
+</div>
+
 ## Properties
 
 All core endpoints MUST support the query parameter **`properties`**, expecting
@@ -313,6 +344,8 @@ The property name `label` is a alias for `prefLabel,altLabel,hiddenLabel`.
 The `uri` property SHOULD always be included in responses, if available.
 
 ## Pagination
+
+[pagination]: #pagination
 
 The core endpoints can return multiple response items. The number of items
 returned can be controlled with request parameter **`limit`**. The default
@@ -352,13 +385,15 @@ To get the list of broader, narrower, or related concepts instead of the full co
 # Extensions
 
 A JSKOS-API MAY support the following extensions and propagate their support
-in [description document].
+in [description response].
 
 ## Truncation
 
+[truncation]: #truncation
+
 The search parameter **`truncate`** set to `truncate=right` enables
 right-truncation for all query parameters or for fixed set of query
-parameters (specified in [description document]) except URIs.
+parameters (specified in [description response]) except URIs.
 
 <div class="example">
 The query 
@@ -428,9 +463,11 @@ The concept is found because
  
 ## Utility endpoints
 
+[utility endpoints]: #utility-endpoints
+
 A JSKOS API SHOULD support additional URL paths to simplify requests. These
-additional methods can all be mapped to the core endpoints, for instance with a
-HTTP proxy that can rewrite URL path and HTTP GET parameters.
+additional methods can all be mapped to the core [request endpoints], for
+instance with a HTTP proxy that can rewrite URL path and HTTP GET parameters.
 
 * `/schemes/{scheme}`
   = `/schemes?notation={scheme}`
@@ -479,6 +516,10 @@ Note that these utility URLs may problematic if notations contain `/`.
 ## Geospatial search
 
 *Support of geospatial search...*
+
+## Write operations
+
+*Support of write-operations with HTTP POST, PUT, DELETE...*
 
 # References
 
