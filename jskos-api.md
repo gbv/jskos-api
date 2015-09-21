@@ -199,18 +199,7 @@ A JSKOS API service SHOULD provide URLs as
 * [mappings endpoint]
 
 Each endpoint supports a set of query parameters, which are combined as boolean
-AND. Boolean OR is only not supported for selected query parameters such as
-`label`.
-
-Label properties and documentation properties can be localized by appending `.`
-and the language tag to the corresponding query parameter, e.g.
-`prefLabel.en=fox`.
-
-<div class="note">
-(How) should language tags be truncated? For instance
-should `prefLabel.en` also match language tag `en-GB`?
-See <https://github.com/gbv/jskos-api/issues/10> for discussion.
-</div>
+AND. 
 
 ## Concepts
 
@@ -349,9 +338,33 @@ noted otherwise.
 * [`limit`, `page`, `unique`](#pagination)
 * [`callback`](#jsonp)
 
+JSKOS properties with datatype language map (`prefLabel`, `altLabel`,
+`scopeNote`...) can further be qualified by [language qualifiers].
+
 Additional query modifiers MAY be supported by [extensions].
 
-## properties
+## Language qualifiers
+[language qualifiers]: #language-qualifiers
+
+Label properties and documentation properties by default refer to any language
+(JSKOS language range "`-`"). The query can be limited to selected languages
+by appending a dot ("`.`") and a language tag or JSKOS language range to the
+query parameter.
+
+<div class="examples"
+```
+prefLabel=fox       # ... (any language)
+prefLabel.en=fox    # en
+prefLabel.en-=fox   # en-GB, en-US, ..
+```
+</div>
+
+<div class="note">
+Should support of language ranges better be an optional extension?
+See <https://github.com/gbv/jskos-api/issues/10> for discussion.
+</div>
+
+## Properties
 
 The **`properties`** query field MUST be supported to allow selection of object
 properties in JSKOS response objects. The value of this field is a
