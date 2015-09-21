@@ -428,17 +428,6 @@ function.
 <div class="note">
 Clients SHOULD prefer CORS over JSONP if needed.
 
-## list
-
-To get the list of broader, narrower, or related concepts instead of the full
-concept, use parameter **`list`** with possible values `broader`, `narrower`,
-`related`.
-
-<div class="note">
-This parameter might be extended.
-See <https://github.com/gbv/jskos-api/issues/6> for discussion.
-</div>
-
 ## JSKOS normalization
 
 A JSKOS-API service MUST return normalized JSKOS.
