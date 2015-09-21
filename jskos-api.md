@@ -453,21 +453,24 @@ concept, use query modification parameter **`list`** with possible values
 
 See <https://github.com/gbv/jskos-api/issues/17> for discussion.
 
-## Truncation
+## Matching operators
 
-[truncation]: #truncation
+By default all query field must fully match (possibly after [character
+folding]). Selected query parameters can be modified to search substring
+or even regular expressions (specified in [service description]).
 
-The search parameter **`truncate`** set to `truncate=right` enables
-right-truncation for all query parameters or for fixed set of query
-parameters (specified in [service description]) except URIs.
+* `name=foo` (exact match)
+* `name^=foo` (at the beginning)
+* `name*=foo` (anywhere)
+* `name~=foo` (regular expression)
+
+Extensions MAY introduce additional matching operators
 
 <div class="example">
 The query 
-`?prefLabel=A&inScheme=http://example.org/schemes/ABC&truncate=right`
+`?prefLabel^=A&inScheme=http://example.org/schemes/ABC`
 at a concepts endpoint will return all concepts in concept scheme
 `http://example.org/schemes/ABC` with preferred label starting with letter "A".
-Such concepts in concept scheme `http://example.org/schemes/ABCDE` will not be
-included.
 </div>
 
 <div class="note">
@@ -476,19 +479,21 @@ also support other query extensions (regular expressions, ranking...).
 See <https://github.com/gbv/jskos-api/issues/11> for discussion.
 </div> 
 
-## Normalization
+## Character folding
+[character folding]: #character-folding
 
 When searching all strings must be Unicode normalized to not distinguish
 composed and decomposed characters sequences.  The final JSON response *must*
 always be normalized in NFC.
 
-Search normalization can be enforced with parameter **`fold`** expecting
+Character folding can be enforced with parameter **`fold`** expecting
 a comma-separated set with the following possible values:
 
 * `canonical` compares strings by canonical equivalence after NFKC. For
   instance ligature `ﬃ` is equivalent to `ffi`.
 * `case` compares strings after conversion to uppercase.
 * `canonical,case` to apply both
+* `accent` ...
 * `all` applies more character folding such as removal of accents. See
   applications of <http://unicode.org/reports/tr30/> for examples and
   implementations. Language tags should be respected to fold differently
@@ -502,15 +507,15 @@ accents and diacritics aka "accent folding". See Unicode
 for possible criteria.
 
 <div class="note">
-Basic support of Unicode normalization is likely to become mandatory
+Basic support of character folding is likely to become mandatory
 in a later version of this specification.
 See <https://github.com/gbv/jskos-api/issues/7> for discussion.
 </div>
 
 <div class="example">
-The following example illustrates truncation and normalization:
+The following example illustrates matching operator and character folding:
 
-    /concepts?prefLabel=weisskopf&truncate=right&fold=all
+    /concepts?prefLabel^=weisskopf&fold=all
 
     [ 
       {
@@ -526,7 +531,7 @@ The concept is found because
 
 * `prefLabel` also finds `prefLabel.de`
 * `fold=all` normalizes "Weißköpfe" to "WEISSKOPFE"
-* `truncate=right` finds "WEISSKOPFE" if only "WEISSKOPF" was searched
+* `prefLabel^=` also finds "WEISSKOPFE" if only "WEISSKOPF" was searched
 </div>
  
 ## Utility endpoints
