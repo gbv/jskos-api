@@ -15,7 +15,11 @@ and [concept mappings](#mappings) in [JSKOS] format.
 ## Status of this document
 
 <div class="note">
-The current version of JSKOS API specification is a very early draft!
+
+The current version of JSKOS API specification is **a very early draft, not 
+fully aligned with implementations**! In doubt please better consult the
+reference implementation in [jskos PHP library](https://packagist.org/packages/gbv/jskos)!
+
 </div>
 
 JSKOS API is being defined as part of project
@@ -670,9 +674,9 @@ clients may also be indicated by increasing the minor version number!
 Releases with functional changes are tagged with a version number and included
 at <https://github.com/gbv/jskos-api/releases> with release notes.
 
-#### 0.1.0 {.unnumbered}
+#### 0.0.0 {.unnumbered}
 
-Semi-stable pre-release.
+Pre-release draft.
 
 ### Full changelog {.unnumbered}
 
