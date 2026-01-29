@@ -37,11 +37,28 @@ Returns a JSON object listing capabilities and endpoints of the server.
 
 ### schemes
 
-Returns a array of JSKOS Concept Schemes.
+Returns an array of [JSKOS Concept Schemes](https://gbv.github.io/jskos/#concept-scheme). The list can be filtered with the following query parameters:
+
+- `uri` - URIs of concept schemes separated by `|`. The list is filtered to concept schemes having one of the URIs in field `uri` or `identifier`
+- ...
+
+Servers MUST support query parameter `uri`. Support of other parameters is OPTIONAL.
+
+*See [corresponding jskos-server endpoint](https://github.com/gbv/jskos-server?tab=readme-ov-file#get-voc)*
 
 ### concepts
 
-...
+Returns an array of [JSKOS Concepts]. The list is controlled by the following query parameters:
+
+- `uri` - URIs of concepts separated by `|`. The list is filtered to concepts having one of the URIs in field `uri` or `identifier`.
+- `voc` - URIs of concept schemes separated by `|`. The list is filtered to concepts having one of the URIs in field `uri` or `identifier` of an element of field `inScheme` of the concept.
+- ...
+
+Servers MUST support query parameters `uri` and `voc`. Support of other parameters is OPTIONAL.
+
+Servers MUST return an empty list of none of these query parameters are given.
+
+*See [corresponding jskos-server endpoint](https://github.com/gbv/jskos-server?tab=readme-ov-file#put-concepts)*
 
 ### narrower
 
@@ -62,6 +79,8 @@ Returns a array of JSKOS Concept Schemes.
 ### data
 
 ...
+
+*See [corresponding DANTE endpoint](https://api.dante.gbv.de/vokabular_methoden/)
 
 ## Authorized access
 
