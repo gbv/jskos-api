@@ -152,5 +152,16 @@ Error response SHOULD include a JSON response body with a JSON object including 
 
 ## References
 
+### Normative References
+
 - JSKOS <https://gbv.github.io/jskos/>
 - Web Linking. RFC 8288 <https://datatracker.ietf.org/doc/html/rfc8288>
+
+### Implementations
+
+- jskos-server (server)
+- KonSys (server)
+- ICONCLASS (server)
+- cocoda-sdk (client)
+- TS4NFDI API Gateway (client)
+
